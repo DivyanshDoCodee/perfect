@@ -61,14 +61,14 @@ const transporter = nodemailer.createTransport({
 
 const app = express()
 app.use(cors({ 
-  origin: 'https://entitlement-review.vercel.app',  // Allows all origins
+  origin: '*',  // Allows all origins
   credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 
 // MongoDB Connection
-mongoose.connect("mongodb+srv://adminUser:Admin%401234@cluster0.xqgfr5n.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+mongoose.connect("mongodb://127.0.0.1:27017/restrict_app")
 .then(() => {
-  console.log('Connected to MongoDB Atlas');
+  console.log('Connected to MongoDB');
   // Initialize change logging
   setupChangeLogging();
   // Start the server only after successful database connection
