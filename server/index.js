@@ -61,7 +61,7 @@ const transporter = nodemailer.createTransport({
 
 const app = express()
 app.use(cors({ 
-  origin: '*',  // Allows all origins
+  origin: 'https://entitlement-review.vercel.app',  // Allows all origins
   credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 
