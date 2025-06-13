@@ -66,9 +66,9 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/restrict_app")
+mongoose.connect("mongodb+srv://adminUser:Admin%401234@cluster0.xqgfr5n.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 .then(() => {
-  console.log('Connected to MongoDB');
+  console.log('Connected to MongoDB Atlas');
   // Initialize change logging
   setupChangeLogging();
   // Start the server only after successful database connection
