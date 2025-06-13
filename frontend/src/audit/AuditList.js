@@ -275,6 +275,20 @@ const AuditList = () => {
             {/* Filter Section */}
             <div className="filter-section mb-3">
               <h5>Filter By Application</h5>
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="applicationFilter"
+                  id="all-applications"
+                  value="All"
+                  checked={selectedApplication === 'All'}
+                  onChange={() => setSelectedApplication('All')}
+                />
+                <label className="form-check-label" htmlFor="all-applications">
+                  All
+                </label>
+              </div>
               {applications.map((app) => (
                 <div key={app._id} className="form-check form-check-inline">
                   <input

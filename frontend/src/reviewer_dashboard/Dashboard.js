@@ -128,9 +128,9 @@ const Dashboard = () => {
                 ))}
                 <th>Reviewer Remarks</th>
                 <th>Action Taken</th>
-                <th>Review Given By</th>
-                <th>Completed Date</th>
-                <th>Completed By</th>
+                <th>Reviewed By</th>
+                <th>Review Date,Time</th>
+                {/* <th>Completed By</th> */}
               </tr>
             </thead>
             <tbody>
@@ -147,7 +147,7 @@ const Dashboard = () => {
                     <td>{review.actionTaken ? review.actionTaken.charAt(0).toUpperCase() + review.actionTaken.slice(1) : 'N/A'}</td>
                     <td>{review.reviewerName || 'N/A'}</td>
                     <td>{review.submittedAt ? new Date(review.submittedAt).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</td>
-                    <td>{review.reviewerName || 'N/A'}</td>
+                    {/* <td>{review.reviewerName || 'N/A'}</td> */}
                   </tr>
                 ))
               ) : (

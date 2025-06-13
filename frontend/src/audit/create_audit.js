@@ -27,6 +27,7 @@ const CreateAuditForm = () => {
   const [users, setUsers] = useState([]);
   const [applications, setApplications] = useState([]);
   const [selectedRights, setSelectedRights] = useState([]);
+  const [rightsDetails, setRightsDetails] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -94,18 +95,25 @@ const CreateAuditForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate that all selected rights have details
+    const missingDetails = selectedRights.filter(right => !rightsDetails[right]?.trim());
+    if (missingDetails.length > 0) {
+      setError(`Please provide details for: ${missingDetails.join(', ')}`);
+      return;
+    }
+
     const newAudit = {
       emp_id: empId,
       user_id: userId,
       application_id: applicationId,
       initialRights: selectedRights.join(","),
+      excelRightsData: rightsDetails // Store the rights details in the same format as Excel uploads
     };
 
     try {
       const response = await axios.post('http://localhost:3002/audit', newAudit);
       Swal.fire({
         title: "Review Created Successfully",
-        // text: "Do you want to proceed with adding this review?",
         icon: "success",
       }).then((result) => {
         window.location.href = "/create_audit";
@@ -113,7 +121,7 @@ const CreateAuditForm = () => {
 
       setError('');
     } catch (err) {
-      setError('Failed to create  Please try again.');
+      setError('Failed to create review. Please try again.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -158,9 +166,29 @@ const CreateAuditForm = () => {
 
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
-    setSelectedRights((prevRights) =>
-      checked ? [...prevRights, value] : prevRights.filter((right) => right !== value)
-    );
+    setSelectedRights((prevRights) => {
+      const newRights = checked 
+        ? [...prevRights, value] 
+        : prevRights.filter((right) => right !== value);
+      
+      // Update rightsDetails when rights are deselected
+      if (!checked) {
+        setRightsDetails(prev => {
+          const newDetails = { ...prev };
+          delete newDetails[value];
+          return newDetails;
+        });
+      }
+      
+      return newRights;
+    });
+  };
+
+  const handleRightsDetailsChange = (right, value) => {
+    setRightsDetails(prev => ({
+      ...prev,
+      [right]: value
+    }));
   };
 
   return (
@@ -227,25 +255,34 @@ const CreateAuditForm = () => {
               <label htmlFor="rights" className="form-label">Initial Rights:</label><br></br>
               
               {appRights && typeof appRights === 'object' && Object.keys(appRights).length > 0 ? (
-                // Iterate over categories if appRights is a non-empty object
                 Object.keys(appRights).map(categoryKey => (
                   <div key={categoryKey} className="mb-2">
-                    <h6>{categoryKey}</h6> {/* Display category name */}
+                    <h6>{categoryKey}</h6>
                     {Array.isArray(appRights[categoryKey]) && appRights[categoryKey].length > 0 ? (
-                      // Iterate over the array of rights for each category and display checkboxes
                       appRights[categoryKey].map((right, rightIndex) => (
-                        <div key={`${categoryKey}-${rightIndex}`} className="form-check">
-                    <input
+                        <div key={`${categoryKey}-${rightIndex}`} className="form-check mb-2">
+                          <input
                             className="form-check-input"
-                      type="checkbox"
+                            type="checkbox"
                             id={`right-${categoryKey}-${rightIndex}`}
-                      value={right}
-                      onChange={handleCheckboxChange}
-                            checked={selectedRights.includes(right)} // Check if right is in selectedRights
-                    />
+                            value={right}
+                            onChange={handleCheckboxChange}
+                            checked={selectedRights.includes(right)}
+                          />
                           <label className="form-check-label" htmlFor={`right-${categoryKey}-${rightIndex}`}>
                             {right}
                           </label>
+                          {selectedRights.includes(right) && (
+                            <div className="mt-2">
+                              <textarea
+                                className="form-control"
+                                placeholder={`Enter details for ${right}`}
+                                value={rightsDetails[right] || ''}
+                                onChange={(e) => handleRightsDetailsChange(right, e.target.value)}
+                                required
+                              />
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -254,33 +291,45 @@ const CreateAuditForm = () => {
                   </div>
                 ))
               ) : Array.isArray(appRights) && appRights.length > 0 ? (
-                // Fallback for cases where appRights might still be a simple array
-                 <div className="mb-2">
-                    <h6>Default Category</h6> {/* Display a default category name */}
-                    {appRights.map((right, index) => (
-                      <div key={`default-${index}`} className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id={`right-default-${index}`}
-                          value={right}
-                          onChange={handleCheckboxChange}
-                          checked={selectedRights.includes(right)} // Check if right is in selectedRights
-                        />
-                        <label className="form-check-label" htmlFor={`right-default-${index}`}>
-                          {right}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mb-2">
+                  <h6>Default Category</h6>
+                  {appRights.map((right, index) => (
+                    <div key={`default-${index}`} className="form-check mb-2">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id={`right-default-${index}`}
+                        value={right}
+                        onChange={handleCheckboxChange}
+                        checked={selectedRights.includes(right)}
+                      />
+                      <label className="form-check-label" htmlFor={`right-default-${index}`}>
+                        {right}
+                      </label>
+                      {selectedRights.includes(right) && (
+                        <div className="mt-2">
+                          <textarea
+                            className="form-control"
+                            placeholder={`Enter details for ${right}`}
+                            value={rightsDetails[right] || ''}
+                            onChange={(e) => handleRightsDetailsChange(right, e.target.value)}
+                            required
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               ) : (appRights && typeof appRights === 'object' && Object.keys(appRights).length === 0) ? (
-                   <small className='text-muted'>No rights assigned to this application</small>
+                <small className='text-muted'>No rights assigned to this application</small>
               ) : (
                 <small className='text-muted'>Select Application First</small>
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary">Create Audit</button>
+            <button type="submit" className="btn btn-primary" disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Audit'}
+            </button>
           </form>
         </div>
       </div>
