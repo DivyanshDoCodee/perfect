@@ -230,7 +230,7 @@ const AuditList = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/creating'); // Fetch all applications
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/creating`); // Fetch all applications
         setApplications(response.data); // Store applications for the filter dropdown
 
       } catch (err) {
